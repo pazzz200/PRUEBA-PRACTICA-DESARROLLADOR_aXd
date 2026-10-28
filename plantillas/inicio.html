@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reserva de hoteles</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<main>
+    <h1>Encuentra tu hotel</h1>
+    <p>Elige ciudad, fechas y cuantas personas van.</p>
+
+    <form method="GET">
+        <input type="hidden" name="buscar" value="1">
+
+        <div>
+            <label for="ciudad">Ciudad</label>
+            <select id="ciudad" name="ciudad">
+                <option value="">Todas</option>
+                {% for nombre in ["Barranquilla", "Cali", "Cartagena", "Bogota"] %}
+                <option value="{{ nombre }}" {% if ciudad == nombre %}selected{% endif %}>{{ nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div>
+            <label for="entrada">Fecha de entrada</label>
+            <input id="entrada" type="date" name="entrada" value="{{ entrada }}" required>
+        </div>
+
+        <div>
+            <label for="salida">Fecha de salida</label>
+            <input id="salida" type="date" name="salida" value="{{ salida }}" required>
+        </div>
+
+        <div>
+            <label for="personas">Personas</label>
+            <input id="personas" type="number" name="personas" min="1" value="{{ personas }}" required>
+        </div>
+
+        <div>
+            <label for="tipo">Tipo de habitacion</label>
+            <select id="tipo" name="tipo">
+                <option value="">Todos</option>
+                <option value="estandar" {% if tipo == "estandar" %}selected{% endif %}>Estandar</option>
+                <option value="premium" {% if tipo == "premium" %}selected{% endif %}>Premium</option>
+                <option value="vip" {% if tipo == "vip" %}selected{% endif %}>VIP</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="temporada">Temporada</label>
+            <select id="temporada" name="temporada">
+                <option value="baja" {% if temporada == "baja" %}selected{% endif %}>Baja</option>
+                <option value="alta" {% if temporada == "alta" %}selected{% endif %}>Alta</option>
+            </select>
+        </div>
+
+        <div>
+            <button type="submit">Ver hoteles disponibles</button>
+        </div>
+    </form>
+
+    {% if error %}
+    <p class="error">{{ error }}</p>
+    {% endif %}
+
+    {% if resultados %}
+    <h2>Hoteles encontrados</h2>
+    {% for hotel in resultados %}
+    <article>
+        <h3>{{ hotel.nombre }} - {{ hotel.ciudad }}</h3>
+        <p>Habitacion: {{ hotel.tipo }}</p>
+        <p>Cupo por habitacion: {{ hotel.capacidad }} personas</p>
+        <p>Cuartos que necesitas: {{ hotel.cuartos_necesarios }}</p>
+        <p>Noches: {{ hotel.noches }}</p>
+        <p>Precio por habitacion/noche: ${{ "{:,.0f}".format(hotel.precio) }}</p>
+        <strong>Total: ${{ "{:,.0f}".format(hotel.total) }}</strong>
+    </article>
+    {% endfor %}
+    <p><small>La disponibilidad sale del inventario actual. Todavia no se descuentan reservas anteriores por fecha.</small></p>
+    {% elif request.args.get("buscar") and not error %}
+    <p>No encontramos hoteles con esos datos.</p>
+    {% endif %}
+</main>
+</body>
+</html>
